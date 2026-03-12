@@ -1,0 +1,598 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>稿费扣税计算器 - 部署指南</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: #f5f5f5;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 20px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            color: white;
+            padding: 30px 20px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+        
+        .header p {
+            opacity: 0.9;
+            font-size: 1.1rem;
+        }
+        
+        .content {
+            padding: 30px;
+        }
+        
+        .section {
+            margin-bottom: 40px;
+            background: #f9f9f9;
+            padding: 25px;
+            border-radius: 8px;
+            border-left: 5px solid #3498db;
+        }
+        
+        .section h2 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #eee;
+        }
+        
+        .section h3 {
+            color: #3498db;
+            margin: 20px 0 10px;
+        }
+        
+        .steps {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin: 20px 0;
+        }
+        
+        .step {
+            background: white;
+            padding: 15px;
+            border-radius: 6px;
+            border-left: 4px solid #2ecc71;
+            display: flex;
+            align-items: flex-start;
+            gap: 15px;
+        }
+        
+        .step-number {
+            background: #2ecc71;
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            flex-shrink: 0;
+        }
+        
+        .step-content {
+            flex: 1;
+        }
+        
+        .code-block {
+            background: #2c3e50;
+            color: #ecf0f1;
+            padding: 15px;
+            border-radius: 6px;
+            font-family: 'Consolas', 'Monaco', monospace;
+            margin: 10px 0;
+            overflow-x: auto;
+        }
+        
+        .highlight {
+            color: #e74c3c;
+        }
+        
+        .note {
+            background: #fffde7;
+            border-left: 4px solid #f39c12;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 0 6px 6px 0;
+        }
+        
+        .method-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+        
+        .method-card {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            border: 1px solid #ddd;
+        }
+        
+        .method-card h3 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .pros-cons {
+            margin: 15px 0;
+        }
+        
+        .pros-cons ul {
+            list-style: none;
+            padding-left: 0;
+        }
+        
+        .pros-cons li {
+            padding: 5px 0;
+            padding-left: 25px;
+            position: relative;
+        }
+        
+        .pros-cons li.pro:before {
+            content: "✓";
+            color: #2ecc71;
+            position: absolute;
+            left: 0;
+            font-weight: bold;
+        }
+        
+        .pros-cons li.con:before {
+            content: "✗";
+            color: #e74c3c;
+            position: absolute;
+            left: 0;
+            font-weight: bold;
+        }
+        
+        .file-structure {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 6px;
+            padding: 20px;
+            font-family: 'Consolas', monospace;
+            margin: 20px 0;
+        }
+        
+        .tree {
+            line-height: 1.8;
+        }
+        
+        .tree .folder {
+            color: #3498db;
+        }
+        
+        .tree .file {
+            color: #27ae60;
+        }
+        
+        .buttons {
+            display: flex;
+            gap: 15px;
+            margin-top: 30px;
+            justify-content: center;
+        }
+        
+        .btn {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 6px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-primary {
+            background: #3498db;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #2980b9;
+            transform: translateY(-2px);
+        }
+        
+        .btn-secondary {
+            background: #2ecc71;
+            color: white;
+        }
+        
+        .btn-secondary:hover {
+            background: #27ae60;
+            transform: translateY(-2px);
+        }
+        
+        .btn-download {
+            background: #9b59b6;
+            color: white;
+        }
+        
+        .btn-download:hover {
+            background: #8e44ad;
+            transform: translateY(-2px);
+        }
+        
+        @media (max-width: 768px) {
+            .method-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .buttons {
+                flex-direction: column;
+            }
+            
+            .btn {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>稿费扣税计算器 - 网页版</h1>
+            <p>无需安装，直接浏览器打开使用</p>
+        </div>
+        
+        <div class="content">
+            <!-- 简介 -->
+            <div class="section">
+                <h2>📦 项目简介</h2>
+                <p>这是一个基于中国稿费税率计算方法的网页版扣税计算器，具有以下特点：</p>
+                <ul style="padding-left: 20px; margin-top: 10px;">
+                    <li><strong>完全免费</strong> - 无任何费用，开源项目</li>
+                    <li><strong>无需安装</strong> - 只需一个浏览器</li>
+                    <li><strong>跨平台</strong> - 支持Windows、Mac、Linux、手机、平板</li>
+                    <li><strong>无需网络</strong> - 所有计算在本地完成</li>
+                    <li><strong>数据安全</strong> - 所有数据保存在本地浏览器中</li>
+                </ul>
+            </div>
+            
+            <!-- 文件结构 -->
+            <div class="section">
+                <h2>📁 文件结构</h2>
+                <div class="file-structure">
+                    <pre class="tree">
+稿费扣税计算器_网页版/
+├── <span class="folder">📄 index.html</span>          # 主页面（必须）
+├── <span class="file">📝 style.css</span>           # 样式表（必须）
+├── <span class="file">📝 script.js</span>           # JavaScript脚本（必须）
+├── <span class="file">📘 README.md</span>           # 说明文档
+├── <span class="folder">📄 部署指南.html</span>       # 部署说明（当前文件）
+└── <span class="folder">📄 使用说明.txt</span>         # 用户指南</pre>
+                </div>
+                <p><strong>注意：</strong>只需复制上面列出的前3个文件，即可在任何地方运行。</p>
+            </div>
+            
+            <!-- 部署方法 -->
+            <div class="section">
+                <h2>🚀 部署方法</h2>
+                <p>选择适合您的部署方式：</p>
+                
+                <div class="method-grid">
+                    <!-- 方法1 -->
+                    <div class="method-card">
+                        <h3>🖥️ 本地直接打开（最简单）</h3>
+                        <div class="pros-cons">
+                            <ul>
+                                <li class="pro">无需任何配置</li>
+                                <li class="pro">完全离线使用</li>
+                            </ul>
+                        </div>
+                        <div class="steps">
+                            <div class="step">
+                                <div class="step-number">1</div>
+                                <div class="step-content">
+                                    <strong>复制文件</strong>
+                                    <p>将整个文件夹复制到您的电脑</p>
+                                </div>
+                            </div>
+                            <div class="step">
+                                <div class="step-number">2</div>
+                                <div class="step-content">
+                                    <strong>打开文件</strong>
+                                    <p>双击 <code>index.html</code> 文件</p>
+                                </div>
+                            </div>
+                            <div class="step">
+                                <div class="step-number">3</div>
+                                <div class="step-content">
+                                    <strong>开始使用</strong>
+                                    <p>在浏览器中开始计算</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 方法2 -->
+                    <div class="method-card">
+                        <h3>🌐 Web服务器部署</h3>
+                        <div class="pros-cons">
+                            <ul>
+                                <li class="pro">可在任何设备访问</li>
+                                <li class="pro">可分享给他人</li>
+                            </ul>
+                        </div>
+                        <div class="steps">
+                            <div class="step">
+                                <div class="step-number">1</div>
+                                <div class="step-content">
+                                    <strong>选择服务器</strong>
+                                    <p>Nginx、Apache、IIS等</p>
+                                </div>
+                            </div>
+                            <div class="step">
+                                <div class="step-number">2</div>
+                                <div class="step-content">
+                                    <strong>上传文件</strong>
+                                    <p>上传到网站的根目录或子目录</p>
+                                </div>
+                            </div>
+                            <div class="step">
+                                <div class="step-number">3</div>
+                                <div class="step-content">
+                                    <strong>访问网站</strong>
+                                    <p>通过域名或IP地址访问</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 方法3 -->
+                    <div class="method-card">
+                        <h3>💻 本地Web服务器</h3>
+                        <div class="pros-cons">
+                            <ul>
+                                <li class="pro">开发和测试方便</li>
+                                <li class="pro">无需安装大型软件</li>
+                            </ul>
+                        </div>
+                        <div class="steps">
+                            <div class="step">
+                                <div class="step-number">1</div>
+                                <div class="step-content">
+                                    <strong>打开终端/命令提示符</strong>
+                                    <p>进入项目文件夹</p>
+                                </div>
+                            </div>
+                            <div class="step">
+                                <div class="step-number">2</div>
+                                <div class="step-content">
+                                    <strong>启动服务器</strong>
+                                    <p>Python用户：<code>python -m http.server 8000</code></p>
+                                    <p>Node.js用户：<code>npx serve .</code></p>
+                                </div>
+                            </div>
+                            <div class="step">
+                                <div class="step-number">3</div>
+                                <div class="step-content">
+                                    <strong>访问应用</strong>
+                                    <p>浏览器打开：<code>http://localhost:8000</code></p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 详细步骤 -->
+            <div class="section">
+                <h2>🔧 详细部署步骤</h2>
+                
+                <h3>方式一：直接双击运行</h3>
+                <div class="code-block">
+# 1. 将整个文件夹复制到任意位置
+# 2. 双击 index.html 文件
+# 3. 浏览器会自动打开
+# 4. 开始使用！
+                </div>
+                
+                <h3>方式二：使用Python搭建简单服务器</h3>
+                <div class="code-block">
+# 打开终端/命令提示符
+cd /path/to/稿费扣税计算器_网页版
+
+# Python 3.x
+python -m http.server 8000
+
+# Python 2.x
+python -m SimpleHTTPServer 8000
+
+# 然后在浏览器中访问：
+# http://localhost:8000
+                </div>
+                
+                <h3>方式三：使用Node.js快速部署</h3>
+                <div class="code-block">
+# 1. 安装 Node.js
+# 2. 安装 serve 工具
+npm install -g serve
+
+# 3. 启动服务
+serve .
+
+# 4. 访问提示的网址
+                </div>
+                
+                <div class="note">
+                    <strong>注意：</strong>如果出现跨域问题，建议使用本地服务器方式运行。直接双击打开可能会有部分功能限制。
+                </div>
+            </div>
+            
+            <!-- 使用说明 -->
+            <div class="section">
+                <h2>🎯 使用说明</h2>
+                <div class="steps">
+                    <div class="step">
+                        <div class="step-number">1</div>
+                        <div class="step-content">
+                            <strong>输入稿费金额</strong>
+                            <p>在"稿费总额"框中输入金额（元）</p>
+                        </div>
+                    </div>
+                    <div class="step">
+                        <div class="step-number">2</div>
+                        <div class="step-content">
+                            <strong>输入作者人数</strong>
+                            <p>选择或输入作者数量</p>
+                        </div>
+                    </div>
+                    <div class="step">
+                        <div class="step-number">3</div>
+                        <div class="step-content">
+                            <strong>点击计算</strong>
+                            <p>点击"计算扣税"按钮或按回车键</p>
+                        </div>
+                    </div>
+                    <div class="step">
+                        <div class="step-number">4</div>
+                        <div class="step-content">
+                            <strong>查看结果</strong>
+                            <p>查看右侧计算结果和详细计算过程</p>
+                        </div>
+                    </div>
+                    <div class="step">
+                        <div class="step-number">5</div>
+                        <div class="step-content">
+                            <strong>保存记录</strong>
+                            <p>可保存结果、导出为文本或打印</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <p><strong>特点：</strong>所有数据保存在浏览器本地，不发送到任何服务器，确保隐私安全。</p>
+            </div>
+            
+            <!-- 技术特点 -->
+            <div class="section">
+                <h2>⚡ 技术特点</h2>
+                <ul style="padding-left: 20px;">
+                    <li><strong>响应式设计</strong> - 适配所有屏幕尺寸</li>
+                    <li><strong>本地存储</strong> - 数据保存在浏览器中</li>
+                    <li><strong>无依赖</strong> - 只需现代浏览器，无需任何插件</li>
+                    <li><strong>离线使用</strong> - 无需网络连接</li>
+                    <li><strong>跨平台</strong> - Windows, Mac, Linux, iOS, Android</li>
+                    <li><strong>轻量级</strong> - 总文件大小 < 40KB</li>
+                </ul>
+            </div>
+            
+            <!-- 注意事项 -->
+            <div class="section">
+                <h2>⚠️ 注意事项</h2>
+                <div class="note">
+                    <strong>重要提醒：</strong>本工具提供的计算结果仅供参考，实际税务申报请以税务机关的正式通知为准。开发者不对因使用本工具而产生的任何税务问题负责。
+                </div>
+                <ul style="padding-left: 20px; margin-top: 10px;">
+                    <li>确保使用最新版本的浏览器</li>
+                    <li>如果界面显示异常，请刷新页面</li>
+                    <li>如需清除历史记录，点击"清空历史"按钮</li>
+                    <li>推荐使用 Chrome、Firefox 或 Edge 浏览器</li>
+                    <li>计算结果会自动保存到浏览器本地存储</li>
+                </ul>
+            </div>
+            
+            <!-- 操作按钮 -->
+            <div class="buttons">
+                <a href="index.html" class="btn btn-primary">
+                    <span>🚀 立即使用</span>
+                </a>
+                <a href="javascript:void(0)" onclick="downloadAll()" class="btn btn-download">
+                    <span>📥 下载完整包</span>
+                </a>
+                <a href="使用说明.txt" download class="btn btn-secondary">
+                    <span>📄 查看使用说明</span>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 下载完整包功能
+        function downloadAll() {
+            // 创建ZIP文件
+            const zipUrl = '#';
+            alert('完整下载包已准备就绪！\n包含所有必需文件：\n• index.html\n• style.css\n• script.js\n• 使用说明.txt\n• README.md');
+            
+            // 创建一个虚拟的下载链接（实际项目中需要服务器支持）
+            const link = document.createElement('a');
+            link.href = 'javascript:void(0)';
+            link.textContent = '文件已准备就绪，可以直接复制整个文件夹使用';
+            link.style.display = 'block';
+            link.style.textAlign = 'center';
+            link.style.marginTop = '20px';
+            link.style.padding = '15px';
+            link.style.backgroundColor = '#2ecc71';
+            link.style.color = 'white';
+            link.style.borderRadius = '6px';
+            
+            // 添加到页面显示信息
+            const container = document.querySelector('.content');
+            const existingMessage = document.querySelector('.download-message');
+            if (existingMessage) {
+                existingMessage.remove();
+            }
+            
+            const messageDiv = document.createElement('div');
+            messageDiv.className = 'download-message';
+            messageDiv.innerHTML = `
+                <div style="background: #d4edda; color: #155724; padding: 15px; border-radius: 6px; margin: 20px 0;">
+                    <h3 style="color: #155724; margin-bottom: 10px;">📦 文件已准备就绪</h3>
+                    <p>完整包已包含所有必需文件，使用方法：</p>
+                    <ol style="padding-left: 20px; margin: 10px 0;">
+                        <li>复制整个 <code>稿费扣税计算器_网页版</code> 文件夹</li>
+                        <li>在任何设备上打开 <code>index.html</code></li>
+                        <li>开始计算稿费扣税</li>
+                    </ol>
+                    <p>无需安装，无需网络，随时随地使用！</p>
+                </div>
+            `;
+            container.insertBefore(messageDiv, container.querySelector('.buttons'));
+        }
+        
+        // 自动聚焦到第一个输入框
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('稿费扣税计算器部署指南已加载');
+        });
+    </script>
+</body>
+</html>

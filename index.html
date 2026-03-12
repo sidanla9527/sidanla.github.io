@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>稿费扣税计算器 - 网页版</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <!-- 头部 -->
+        <header class="header">
+            <h1><i class="fas fa-calculator"></i> 稿费扣税计算器</h1>
+            <p class="subtitle">基于中国稿费税率计算方法</p>
+        </header>
+
+        <!-- 说明区域 -->
+        <div class="info-section">
+            <div class="info-card">
+                <h3><i class="fas fa-info-circle"></i> 计算方法说明</h3>
+                <p>根据《中华人民共和国个人所得税法》规定：</p>
+                <ul>
+                    <li><strong>收入≤4000元</strong>：应纳税所得额 = 稿费收入 - 800元</li>
+                    <li><strong>收入＞4000元</strong>：应纳税所得额 = 稿费收入 × (1 - 20%)</li>
+                    <li><strong>稿酬所得减征30%</strong>：实际缴税额 = 应纳税所得额 × 20% × 70%</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- 主计算区域 -->
+        <div class="main-section">
+            <div class="input-section">
+                <h2><i class="fas fa-edit"></i> 输入稿费信息</h2>
+                
+                <div class="input-group">
+                    <label for="amount">
+                        <i class="fas fa-money-bill-wave"></i> 稿费总额（元）
+                    </label>
+                    <div class="input-with-icon">
+                        <input type="number" id="amount" placeholder="请输入稿费金额" min="0" step="0.01">
+                        <span class="input-icon">¥</span>
+                    </div>
+                </div>
+
+                <div class="input-group">
+                    <label for="authors">
+                        <i class="fas fa-users"></i> 作者人数
+                    </label>
+                    <div class="input-with-icon">
+                        <input type="number" id="authors" value="1" min="1" max="100">
+                        <span class="input-icon"><i class="fas fa-user"></i></span>
+                    </div>
+                </div>
+
+                <button id="calculateBtn" class="calculate-btn">
+                    <i class="fas fa-calculator"></i> 计算扣税
+                </button>
+
+                <div class="shortcut-hint">
+                    <i class="fas fa-lightbulb"></i> 提示：输入后按回车键可直接计算
+                </div>
+            </div>
+
+            <div class="result-section">
+                <h2><i class="fas fa-chart-line"></i> 计算结果</h2>
+                
+                <div class="result-grid">
+                    <div class="result-item">
+                        <span class="result-label">稿费总额</span>
+                        <span id="totalAmount" class="result-value">--</span>
+                        <span class="result-unit">元</span>
+                    </div>
+                    <div class="result-item">
+                        <span class="result-label">作者人数</span>
+                        <span id="authorsCount" class="result-value">--</span>
+                        <span class="result-unit">人</span>
+                    </div>
+                    <div class="result-item">
+                        <span class="result-label">人均稿费</span>
+                        <span id="perAuthor" class="result-value">--</span>
+                        <span class="result-unit">元</span>
+                    </div>
+                    <div class="result-item highlight">
+                        <span class="result-label">应纳税所得额</span>
+                        <span id="taxableIncome" class="result-value">--</span>
+                        <span class="result-unit">元</span>
+                    </div>
+                    <div class="result-item">
+                        <span class="result-label">适用税率</span>
+                        <span id="taxRate" class="result-value">--</span>
+                        <span class="result-unit">%</span>
+                    </div>
+                    <div class="result-item">
+                        <span class="result-label">应纳税额</span>
+                        <span id="taxAmount" class="result-value">--</span>
+                        <span class="result-unit">元</span>
+                    </div>
+                    <div class="result-item">
+                        <span class="result-label">减征税额</span>
+                        <span id="reductionAmount" class="result-value">--</span>
+                        <span class="result-unit">元</span>
+                    </div>
+                    <div class="result-item highlight">
+                        <span class="result-label">实际缴税额</span>
+                        <span id="actualTax" class="result-value">--</span>
+                        <span class="result-unit">元</span>
+                    </div>
+                    <div class="result-item success">
+                        <span class="result-label">实际到手金额</span>
+                        <span id="netIncome" class="result-value">--</span>
+                        <span class="result-unit">元</span>
+                    </div>
+                    <div class="result-item success">
+                        <span class="result-label">到手比例</span>
+                        <span id="netPercentage" class="result-value">--</span>
+                        <span class="result-unit">%</span>
+                    </div>
+                </div>
+
+                <!-- 进度条 -->
+                <div class="progress-section">
+                    <div class="progress-label">
+                        <span>到手比例</span>
+                        <span id="percentageText">0%</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div id="percentageBar" class="progress-fill"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 详细计算过程 -->
+        <div class="detail-section">
+            <h2><i class="fas fa-list-alt"></i> 详细计算过程</h2>
+            <div class="detail-content">
+                <div id="calculationSteps">
+                    <p class="empty-state">请先输入稿费金额进行计算</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- 历史记录 -->
+        <div class="history-section">
+            <div class="history-header">
+                <h2><i class="fas fa-history"></i> 计算历史</h2>
+                <button id="clearHistoryBtn" class="clear-btn">
+                    <i class="fas fa-trash-alt"></i> 清空历史
+                </button>
+            </div>
+            <div class="history-content">
+                <div id="historyList">
+                    <p class="empty-state">暂无计算历史</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- 操作按钮 -->
+        <div class="action-buttons">
+            <button id="saveBtn" class="action-btn save-btn">
+                <i class="fas fa-save"></i> 保存结果
+            </button>
+            <button id="exportBtn" class="action-btn export-btn">
+                <i class="fas fa-download"></i> 导出为文本
+            </button>
+            <button id="printBtn" class="action-btn print-btn">
+                <i class="fas fa-print"></i> 打印结果
+            </button>
+            <button id="resetBtn" class="action-btn reset-btn">
+                <i class="fas fa-redo"></i> 重新计算
+            </button>
+        </div>
+
+        <!-- 页脚 -->
+        <footer class="footer">
+            <p>© 2024 稿费扣税计算器 - 网页版 | 基于中国税法标准计算</p>
+            <p class="footer-note">
+                <i class="fas fa-exclamation-circle"></i> 计算结果仅供参考，实际税务以税务机关为准
+            </p>
+        </footer>
+    </div>
+
+    <!-- 模态框 -->
+    <div id="resultModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3><i class="fas fa-check-circle"></i> 计算完成</h3>
+                <button class="close-btn">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p id="modalMessage">计算已完成！</p>
+                <div class="modal-result">
+                    <div class="modal-result-item">
+                        <span>稿费总额：</span>
+                        <strong id="modalTotal">--</strong>
+                    </div>
+                    <div class="modal-result-item">
+                        <span>实际到手：</span>
+                        <strong id="modalNet" class="highlight-text">--</strong>
+                    </div>
+                    <div class="modal-result-item">
+                        <span>到手比例：</span>
+                        <strong id="modalPercentage" class="highlight-text">--</strong>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button id="modalOkBtn" class="modal-btn ok-btn">确定</button>
+                <button id="modalSaveBtn" class="modal-btn save-btn">保存结果</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 脚本 -->
+    <script src="script.js"></script>
+</body>
+</html>
